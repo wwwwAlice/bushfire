@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combined Visualization: Bushfire Safer Place and CPI Data</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+
+  <h1>Combined Visualization: Bushfire Safer Place and CPI Data</h1>
+
+  <!-- Bushfire Safer Place Visualization -->
+  <h2>Bushfire Safer Place in South Australia</h2>
+  <div id="bushfire_vis"></div>
+
+  <!-- CPI Data Visualization -->
+  <h2>CPI Data: Australia and New Zealand (2018-2022)</h2>
+  <div id="cpi_vis"></div>
+
+  <!-- Bushfire Safer Place Visualization Script -->
+  <script type="text/javascript">
+    var bushfireSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 800,
+      "height": 450,
+      "title": {
+        "fontSize": 20,
+        "text": "Bushfire Safer Place South Australia"
+      },
+      "layer": [
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/wwwwAlice/FIT3179week9/refs/heads/main/SAMAP.json", 
+            "format": {"type": "topojson", "feature": "australian-states"}
+          },
+          "mark": {
+            "type": "geoshape",
+            "fill": "#e0e0e0", 
+            "stroke": "gray",
+            "strokeWidth": 1
+          },
+          "encoding": {
+            "tooltip": [
+              {"field": "STATE_NAME", "type": "nominal", "title": "State Name"}
+            ]
+          }
+        },
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/wwwwAlice/FIT3179week9/refs/heads/main/BushfireSaferPlaces_GDA.json", 
+            "format": {"type": "topojson", "feature": "BushfireSaferPlaces_GDA2020"}
+          },
+          "mark": {
+            "type": "geoshape",
+            "fill": "#e0e0e0", 
+            "stroke": "red",
+            "strokeWidth": 1
+          },
+          "encoding": {
+            "tooltip": [
+              {"field": "STATE_NAME", "type": "nominal", "title": "State Name"}
+            ]
+          }
+        }
+      ]
+    };
+
+    vegaEmbed('#bushfire_vis', bushfireSpec).then(function(result) {
+      console.log(result);
+    }).catch(console.error);
+  </script>
+
+  <!-- CPI Visualization Script -->
+  <script type="text/javascript">
+    var cpiSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "description": "CPI in Australia and New Zealand (2018-2022) with a dropdown filter",
+      "width": 800,
+      "height": 450,
+      "data": {
+        "values": [
+          {"Country": "Australia", "Year": "2018", "CPI": 112.1},
+          {"Country": "Australia", "Year": "2019", "CPI": 113.5},
+          {"Country": "Australia", "Year": "2020", "CPI": 114.2},
+          {"Country": "Australia", "Year": "2021", "CPI": 115.8},
+          {"Country": "Australia", "Year": "2022", "CPI": 117.6},
+          {"Country": "New Zealand", "Year": "2018", "CPI": 102.3},
+          {"Country": "New Zealand", "Year": "2019", "CPI": 103.7},
+          {"Country": "New Zealand", "Year": "2020", "CPI": 104.6},
+          {"Country": "New Zealand", "Year": "2021", "CPI": 106.2},
+          {"Country": "New Zealand", "Year": "2022", "CPI": 107.9}
+        ]
+      },
+      "params": [
+        {
+          "name": "country_filter",
+          "value": "All",
+          "bind": {
+            "input": "select",
+            "options": ["All", "Australia", "New Zealand"],
+            "name": "Filter by Country"
+          }
+        }
+      ],
+      "transform": [
+        {
+          "filter": "country_filter === 'All' || datum.Country === country_filter"
+        }
+      ],
+      "vconcat": [
+        {
+          "mark": "bar",
+          "encoding": {
+            "x": {
+              "field": "Year",
+              "type": "ordinal",
+              "axis": {"title": "Year"}
+            },
+            "y": {
+              "field": "CPI",
+              "type": "quantitative",
+              "axis": {"title": "CPI"}
+            },
+            "color": {
+              "field": "Country",
+              "type": "nominal",
+              "legend": {"title": "Country"}
+            }
+          }
+        },
+        {
+          "mark": "bar",
+          "params": [
+            {
+              "name": "brush",
+              "select": {"type": "interval", "encodings": ["x"]}
+            }
+          ],
+          "encoding": {
+            "x": {
+              "field": "Year",
+              "type": "ordinal",
+              "axis": {"title": "Year"},
+              "scale": {"domain": {"param": "brush"}}
+            },
+            "y": {
+              "field": "CPI",
+              "type": "quantitative",
+              "axis": {"title": "CPI", "tickCount": 3, "grid": false}
+            },
+            "color": {
+              "field": "Country",
+              "type": "nominal"
+            }
+          }
+        }
+      ]
+    };
+
+    vegaEmbed('#cpi_vis', cpiSpec).then(function(result) {
+      console.log(result);
+    }).catch(console.error);
+  </script>
+
+</body>
+</html>
